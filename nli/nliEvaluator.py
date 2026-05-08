@@ -109,51 +109,67 @@ Answer:"""
 #         return predict_classification(model, tokenizer, premise, hypothesis)
     
 
+# nliEvaluator.py
+import torch
+
+id2label = {0: "Entailment", 1: "Neutral", 2: "Contradiction"}
+label_words = ["entailment", "neutral", "contradiction"]   # verbalizer
+
 def predict(model, tokenizer, premise, hypothesis, model_key, shot=0):
-    id2label = {0: "Entailment", 1: "Neutral", 2: "Contradiction"}
     
+    # ===================== BERT / DeBERTa Prompting =====================
     if "bert" in model_key.lower() or "deberta" in model_key.lower():
-        # === 重要修复：加上 [SEP] 分隔符 ===
-        text_pair = f"{premise} [SEP] {hypothesis}"
-        
-        inputs = tokenizer(text_pair, 
-                          truncation=True, 
-                          padding=True, 
-                          max_length=256, 
-                          return_tensors="pt")
-        
+        prompt = f"""Premise: {premise}
+Hypothesis: {hypothesis}
+
+The relationship between premise and hypothesis is [MASK]."""
+
+        inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512)
         inputs = {k: v.to(model.device) for k, v in inputs.items()}
+        
+        mask_token_index = (inputs['input_ids'] == tokenizer.mask_token_id).nonzero(as_tuple=True)[1]
         
         with torch.no_grad():
             outputs = model(**inputs)
-            logits = outputs.logits
-            probs = torch.softmax(logits, dim=-1)[0]
-            pred_id = torch.argmax(logits, dim=-1).item()
-            prob = probs[pred_id].item()
+            logits = outputs.logits[0, mask_token_index, :]
+            
+            # 只看 entailment/neutral/contradiction 这三个词的概率
+            scores = []
+            for word in label_words:
+                token_id = tokenizer.encode(word, add_special_tokens=False)[0]
+                scores.append(logits[0, token_id].item())
+            
+            pred_id = torch.argmax(torch.tensor(scores)).item()
         
-        print(f"[{model_key}] Logits: {logits[0].cpu().numpy().round(3)} | "
-              f"Probs: {probs.cpu().numpy().round(3)} | Pred: {id2label[pred_id]} ({prob:.3f})")
+        print(f"[{model_key} Prompt] Scores: {scores} → Pred: {id2label[pred_id]}")
         return pred_id
-    
+
+    # ===================== Qwen Prompting =====================
     else:
-        # Qwen 部分保持你当前的（或用下面更强的prompt）
-        prompt = f"""Task: Natural Language Inference
-Determine if the hypothesis is entailed by, contradicts, or is neutral to the premise.
+        prompt = f"""You are an expert in Natural Language Inference.
 
 Premise: {premise}
 Hypothesis: {hypothesis}
 
-Answer with exactly one word: Entailment, Neutral or Contradiction.
+Determine the relationship. Reply with **EXACTLY ONE WORD** only:
+Entailment, Neutral, or Contradiction
 
-Answer: """
+Answer:"""
 
         inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+        
         with torch.no_grad():
-            outputs = model.generate(**inputs, max_new_tokens=8, temperature=0.0, 
-                                   do_sample=False, pad_token_id=tokenizer.pad_token_id)
+            outputs = model.generate(
+                **inputs,
+                max_new_tokens=6,
+                temperature=0.0,
+                do_sample=False,
+                pad_token_id=tokenizer.pad_token_id,
+                eos_token_id=tokenizer.eos_token_id
+            )
         
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        answer = response[-100:].lower()
+        answer = response.strip().lower()
         
         if "entail" in answer:
             pred_id = 0
@@ -162,5 +178,5 @@ Answer: """
         else:
             pred_id = 1
             
-        print(f"[Qwen] Response: {response[-120:]} → Pred: {id2label[pred_id]}")
+        print(f"[Qwen] Raw: '{response[-150:]}' → Pred: {id2label[pred_id]}")
         return pred_id
