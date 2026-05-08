@@ -28,6 +28,8 @@ def download_crows_pairs():
     print(f"Downloading CrowS-Pairs from GitHub...")
     df = pd.read_csv(url)
     print(f"Downloaded {len(df)} pairs")
+    print(f"Column names: {list(df.columns)}")  # 打印列名
+    print(f"First row: {df.iloc[0].to_dict()}")
     return df
 
 
@@ -48,19 +50,17 @@ def load_crows_pairs(domain, max_samples=80):
     # 下载数据
     df = download_crows_pairs()
     
+    # # 打印列名以调试
+    # print(f"Columns: {list(df.columns)}")
+    
     # 先打印所有可用的领域
-    print_available_domains(df)
+    # print_available_domains(df)
     
     # 检查领域是否存在（不区分大小写）
     available_domains = df['bias_type'].unique()
     if domain not in available_domains:
         print(f"⚠️ Domain '{domain}' not found!")
-        print(f"Available domains: {available_domains}")
-        # 尝试模糊匹配
-        for avail in available_domains:
-            if domain.lower() in avail.lower() or avail.lower() in domain.lower():
-                print(f"  Did you mean: '{avail}'?")
-        return []  # 返回空列表
+        return []
     
     # 过滤指定领域
     domain_df = df[df["bias_type"] == domain]
