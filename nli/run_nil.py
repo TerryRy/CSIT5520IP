@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.metrics import accuracy_score
 from nliEvaluator import predict
 from tqdm import tqdm
-from utils import load_model_and_tokenizer, MODELS, load_multinli_jsonl
+from utils import load_model_and_tokenizer, MODELS, load_multinli_jsonl, id2label
 
 # ================== 配置区域 ==================
 
@@ -22,8 +22,8 @@ def evaluate_dataset(df, model_key, shot=0):
     preds = []
     for _, row in tqdm(df.iterrows(), total=len(df)):
         pred = predict(model, tokenizer, row['premise'], row['hypothesis'], model_key, shot=shot)
-        print(f"{model_key} (shot={shot}) pred: {pred} gold: {row['label']}") 
-        preds.append(pred)
+        print(f"{model_key} (shot={shot}) pred: {id2label[pred]} gold: {row['label']}") 
+        preds.append(id2label[pred])
     
     acc = accuracy_score(df['label'], preds)
     print(f"{model_key} (shot={shot}) Accuracy: {acc:.4f}")
