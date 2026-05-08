@@ -21,5 +21,5 @@ echo "GPU Info:"
 nvidia-smi
 
 # ==================== 运行 ====================
-python run_ni.py
+python run_nil.py
 echo "Evaluation completed at $(date)"
