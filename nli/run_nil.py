@@ -9,7 +9,7 @@ from utils import load_model_and_tokenizer, MODELS, load_multinli_jsonl, id2labe
 # ================== 配置区域 ==================
 
 
-shots = [0, 3, 5, 8]
+shots = [0, 1, 3]
 # =============================================
 
 # 加载课程提供的两个数据集
