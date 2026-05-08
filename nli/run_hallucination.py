@@ -135,9 +135,9 @@ def main():
     
     # 步骤1: 加载数据（使用test集）
     print("\n[Step 1] Loading test data...")
-    test_df = load_hallucination_data(split="evaluation", max_samples=10)
+    test_df = load_hallucination_data(split="evaluation", max_samples=None)
     # TODO 验证完删掉这行注释
-    test_df = test_df.head(10)
+    # test_df = test_df.head(10)
     # 步骤2: 选择第二个任务要使用的模型
     # 复用第一个任务的 MODELS 字典
     selected_models = {
