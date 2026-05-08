@@ -2,7 +2,7 @@
 from datasets import load_dataset
 import pandas as pd
 from sklearn.metrics import accuracy_score
-from nli_evaluator import predict_prompting
+from nliEvaluator import predict_prompting
 from tqdm import tqdm
 from .utils import load_model_and_tokenizer, MODELS, load_multinli_jsonl
 
