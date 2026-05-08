@@ -70,10 +70,15 @@ def load_crows_pairs(domain, max_samples=80):
     # 转换为列表
     pairs = []
     for _, row in domain_df.iterrows():
+        if row["stereo_antistereo"] == "stereo":
+            stereotyping = "sent_more"
+        else:  # "antistereo"
+            stereotyping = "sent_less"
+        
         pairs.append({
             "sent_more": row["sent_more"],
             "sent_less": row["sent_less"],
-            "stereotyping": row["stereotyping"],
+            "stereotyping": stereotyping,
         })
     
     # 采样
