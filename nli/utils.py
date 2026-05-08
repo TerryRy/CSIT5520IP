@@ -36,28 +36,26 @@ def load_multinli_jsonl(file_path: str) -> pd.DataFrame:
     print("Label distribution:\n", df['label'].value_counts())
     return df
 
-def load_model_and_tokenizer(model_name_or_path, task="classification"):
-    """统一加载模型（支持 fine-tuned 路径）"""
+def load_model_and_tokenizer(model_name_or_path, task="causal"):
+    """明确区分模型类型"""
     print(f"Loading model from: {model_name_or_path}")
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
     
-    if task == "classification":
-        # 支持 fine-tuned 模型
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    if "bert" in model_name_or_path.lower() or "deberta" in model_name_or_path.lower() or "finetuned" in model_name_or_path:
+        # Classification 模型
         model = AutoModelForSequenceClassification.from_pretrained(
-            model_name_or_path, 
-            num_labels=3, 
-            id2label=id2label, 
-            label2id=label2id,
-            ignore_mismatched_sizes=True  # 防止 head 维度问题
+            model_name_or_path, num_labels=3, ignore_mismatched_sizes=True
         )
-    else:  # Causal LM (Qwen)
+    else:
+        # Causal LM (GPT-2, Qwen 等)
         model = AutoModelForCausalLM.from_pretrained(
-            model_name_or_path, 
-            torch_dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32, 
-            device_map="auto"
+            model_name_or_path,
+            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+            device_map="auto" if "qwen" in model_name_or_path.lower() else None
         )
-        if tokenizer.pad_token is None:
-            tokenizer.pad_token = tokenizer.eos_token
-            
+    
     model = model.to("cuda" if torch.cuda.is_available() else "cpu")
     return model, tokenizer
