@@ -1,0 +1,214 @@
+Job started at Fri May  8 08:57:09 PM HKT 2026
+Running on node: dgx-21
+GPU Info:
+Fri May  8 20:57:09 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.158.01             Driver Version: 570.158.01     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA H800                    On  |   00000000:43:00.0 Off |                    0 |
+| N/A   24C    P0             71W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loaded 15 few-shot examples
+Label distribution: {'entailment': 5, 'neutral': 5, 'contradiction': 5}
+============================================================
+Task 2.2: NLI for Hallucination Detection
+============================================================
+
+[Step 1] Loading test data...
+Loading hallucination dataset (evaluation split)...
+Available splits: ['evaluation']
+Loaded 10 sentence-level samples from evaluation split
+
+Label distribution (binary):
+  Factual (0): 2
+  Hallucination (1): 8
+
+Label distribution (original):
+original_label
+major_inaccurate    7
+accurate            2
+minor_inaccurate    1
+Name: count, dtype: int64
+
+[Step 2] Evaluating models on hallucination detection...
+
+##################################################
+Processing model: flan_t5_prompt
+##################################################
+Loading model from: google/flan-t5-base
+Loading weights:   0%|          | 0/282 [00:00<?, ?it/s]Loading weights: 100%|██████████| 282/282 [00:00<00:00, 3060.70it/s]
+[transformers] The tied weights mapping and config for this model specifies to tie shared.weight to lm_head.weight, but both are present in the checkpoints with different values, so we will NOT tie them. You should update the config with `tie_word_embeddings=False` to silence this warning.
+
+Evaluating flan_t5_prompt on hallucination detection...
+flan_t5_prompt:   0%|          | 0/10 [00:00<?, ?it/s]flan_t5_prompt:  10%|█         | 1/10 [00:00<00:04,  2.09it/s]flan_t5_prompt:  40%|████      | 4/10 [00:00<00:00,  8.48it/s]flan_t5_prompt:  70%|███████   | 7/10 [00:00<00:00, 13.06it/s]flan_t5_prompt: 100%|██████████| 10/10 [00:00<00:00, 12.64it/s]
+
+==================================================
+Results for flan_t5_prompt
+==================================================
+Accuracy:  0.9000
+Precision: 0.8889
+Recall:    1.0000
+F1 Score:  0.9412
+
+Classification Report:
+               precision    recall  f1-score   support
+
+      factual       1.00      0.50      0.67         2
+hallucination       0.89      1.00      0.94         8
+
+     accuracy                           0.90        10
+    macro avg       0.94      0.75      0.80        10
+ weighted avg       0.91      0.90      0.89        10
+
+
+NLI label distribution:
+neutral       9
+entailment    1
+Name: count, dtype: int64
+  entailment: 1
+  neutral: 9
+  contradiction: 0
+
+##################################################
+Processing model: qwen_prompt
+##################################################
+Loading model from: Qwen/Qwen3-8B
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<03:40,  1.81it/s]Loading weights:   1%|          | 2/399 [00:00<02:02,  3.24it/s]Loading weights:  10%|▉         | 38/399 [00:00<00:04, 78.06it/s]Loading weights:  14%|█▍        | 56/399 [00:00<00:03, 99.24it/s]Loading weights:  18%|█▊        | 72/399 [00:01<00:03, 106.85it/s]Loading weights:  22%|██▏       | 89/399 [00:01<00:02, 120.04it/s]Loading weights:  26%|██▌       | 104/399 [00:01<00:02, 115.79it/s]Loading weights:  31%|███       | 122/399 [00:01<00:02, 129.17it/s]Loading weights:  34%|███▍      | 137/399 [00:01<00:02, 125.23it/s]Loading weights:  38%|███▊      | 151/399 [00:01<00:01, 129.00it/s]Loading weights:  42%|████▏     | 169/399 [00:01<00:01, 125.59it/s]Loading weights:  48%|████▊     | 191/399 [00:01<00:01, 135.19it/s]Loading weights:  51%|█████▏    | 205/399 [00:02<00:01, 135.32it/s]Loading weights:  56%|█████▌    | 222/399 [00:02<00:01, 140.52it/s]Loading weights:  59%|█████▉    | 237/399 [00:02<00:01, 128.09it/s]Loading weights:  63%|██████▎   | 251/399 [00:02<00:01, 129.18it/s]Loading weights:  67%|██████▋   | 268/399 [00:02<00:00, 132.98it/s]Loading weights:  72%|███████▏  | 289/399 [00:02<00:00, 148.28it/s]Loading weights:  76%|███████▋  | 305/399 [00:02<00:00, 136.34it/s]Loading weights:  81%|████████  | 323/399 [00:02<00:00, 134.57it/s]Loading weights:  84%|████████▍ | 337/399 [00:02<00:00, 132.94it/s]Loading weights:  88%|████████▊ | 353/399 [00:03<00:00, 138.04it/s]Loading weights:  92%|█████████▏| 367/399 [00:03<00:00, 133.74it/s]Loading weights:  96%|█████████▌| 384/399 [00:03<00:00, 143.29it/s]Loading weights: 100%|██████████| 399/399 [00:03<00:00, 117.10it/s]
+
+Evaluating qwen_prompt on hallucination detection...
+qwen_prompt:   0%|          | 0/10 [00:00<?, ?it/s]qwen_prompt:  10%|█         | 1/10 [00:00<00:04,  1.95it/s]qwen_prompt:  20%|██        | 2/10 [00:00<00:03,  2.13it/s]qwen_prompt:  30%|███       | 3/10 [00:01<00:03,  2.19it/s]qwen_prompt:  40%|████      | 4/10 [00:01<00:02,  2.23it/s]qwen_prompt:  50%|█████     | 5/10 [00:02<00:02,  2.26it/s]qwen_prompt:  60%|██████    | 6/10 [00:02<00:01,  2.27it/s]qwen_prompt:  70%|███████   | 7/10 [00:03<00:01,  2.27it/s]qwen_prompt:  80%|████████  | 8/10 [00:03<00:00,  2.26it/s]qwen_prompt:  90%|█████████ | 9/10 [00:04<00:00,  2.25it/s]qwen_prompt: 100%|██████████| 10/10 [00:04<00:00,  2.21it/s]qwen_prompt: 100%|██████████| 10/10 [00:04<00:00,  2.22it/s]
+
+==================================================
+Results for qwen_prompt
+==================================================
+Accuracy:  0.9000
+Precision: 0.8889
+Recall:    1.0000
+F1 Score:  0.9412
+
+Classification Report:
+               precision    recall  f1-score   support
+
+      factual       1.00      0.50      0.67         2
+hallucination       0.89      1.00      0.94         8
+
+     accuracy                           0.90        10
+    macro avg       0.94      0.75      0.80        10
+ weighted avg       0.91      0.90      0.89        10
+
+
+NLI label distribution:
+contradiction    6
+neutral          3
+entailment       1
+Name: count, dtype: int64
+  entailment: 1
+  neutral: 3
+  contradiction: 6
+
+##################################################
+Processing model: bert_finetuned_10000
+##################################################
+Loading model from: ./bert_finetuned_10000
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 8526.39it/s]
+
+Evaluating bert_finetuned_10000 on hallucination detection...
+bert_finetuned_10000:   0%|          | 0/10 [00:00<?, ?it/s]bert_finetuned_10000: 100%|██████████| 10/10 [00:00<00:00, 167.25it/s]
+
+==================================================
+Results for bert_finetuned_10000
+==================================================
+Accuracy:  0.9000
+Precision: 0.8889
+Recall:    1.0000
+F1 Score:  0.9412
+
+Classification Report:
+               precision    recall  f1-score   support
+
+      factual       1.00      0.50      0.67         2
+hallucination       0.89      1.00      0.94         8
+
+     accuracy                           0.90        10
+    macro avg       0.94      0.75      0.80        10
+ weighted avg       0.91      0.90      0.89        10
+
+
+NLI label distribution:
+neutral       9
+entailment    1
+Name: count, dtype: int64
+  entailment: 1
+  neutral: 9
+  contradiction: 0
+
+##################################################
+Processing model: bert_finetuned_50000
+##################################################
+Loading model from: ./bert_finetuned_50000
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 9056.54it/s]
+
+Evaluating bert_finetuned_50000 on hallucination detection...
+bert_finetuned_50000:   0%|          | 0/10 [00:00<?, ?it/s]bert_finetuned_50000: 100%|██████████| 10/10 [00:00<00:00, 184.75it/s]
+
+==================================================
+Results for bert_finetuned_50000
+==================================================
+Accuracy:  1.0000
+Precision: 1.0000
+Recall:    1.0000
+F1 Score:  1.0000
+
+Classification Report:
+               precision    recall  f1-score   support
+
+      factual       1.00      1.00      1.00         2
+hallucination       1.00      1.00      1.00         8
+
+     accuracy                           1.00        10
+    macro avg       1.00      1.00      1.00        10
+ weighted avg       1.00      1.00      1.00        10
+
+
+NLI label distribution:
+neutral          5
+contradiction    3
+entailment       2
+Name: count, dtype: int64
+  entailment: 2
+  neutral: 5
+  contradiction: 3
+Failure analysis:   0%|          | 0/10 [00:00<?, ?it/s]Failure analysis: 100%|██████████| 10/10 [00:00<00:00, 189.35it/s]
+
+Failure Case Analysis for bert_finetuned_50000:
+  False Positives (predicted hallucination, actual factual): 0
+  False Negatives (predicted factual, actual hallucination): 0
+
+[Step 3] Saving results...
+
+============================================================
+Summary of Hallucination Detection Results
+============================================================
+               model  accuracy  precision  recall       f1
+      flan_t5_prompt       0.9   0.888889     1.0 0.941176
+         qwen_prompt       0.9   0.888889     1.0 0.941176
+bert_finetuned_10000       0.9   0.888889     1.0 0.941176
+bert_finetuned_50000       1.0   1.000000     1.0 1.000000
+
+Results saved to hallucination_detection_results.csv
+Evaluation completed at Fri May  8 08:57:36 PM HKT 2026

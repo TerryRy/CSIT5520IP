@@ -1,0 +1,54 @@
+Job started at Fri May  8 11:57:18 PM HKT 2026
+Running on node: dgx-51
+GPU Info:
+Fri May  8 23:57:18 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.158.01             Driver Version: 570.158.01     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA H800                    On  |   00000000:1B:00.0 Off |                    0 |
+| N/A   33C    P0             71W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+============================================================
+Task 3: Bias Evaluation in Language Models
+Domain: gender/gender identity
+============================================================
+
+[Step 1] Loading CrowS-Pairs dataset...
+
+Loading pairs for domain: gender/gender identity
+Downloading CrowS-Pairs from GitHub...
+Downloaded 1508 pairs
+
+Available domains:
+--------------------------------------------------
+  race-color: 516 pairs
+  socioeconomic: 172 pairs
+  gender: 262 pairs
+  disability: 60 pairs
+  nationality: 159 pairs
+  sexual-orientation: 84 pairs
+  physical-appearance: 63 pairs
+  religion: 105 pairs
+  age: 87 pairs
+--------------------------------------------------
+⚠️ Domain 'gender/gender identity' not found!
+Available domains: ['race-color' 'socioeconomic' 'gender' 'disability' 'nationality'
+ 'sexual-orientation' 'physical-appearance' 'religion' 'age']
+  Did you mean: 'gender'?
+
+⚠️ No data loaded. Please check the domain name and try again.
+Edit SELECTED_DOMAIN in the script with one of the available domains above.
+Evaluation completed at Fri May  8 11:57:31 PM HKT 2026

@@ -1,0 +1,218 @@
+Job started at Fri May  8 08:46:07 PM HKT 2026
+Running on node: dgx-21
+GPU Info:
+Fri May  8 20:46:07 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.158.01             Driver Version: 570.158.01     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA H800                    On  |   00000000:43:00.0 Off |                    0 |
+| N/A   24C    P0             71W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loaded 15 few-shot examples
+Label distribution: {'entailment': 5, 'neutral': 5, 'contradiction': 5}
+============================================================
+Task 2.2: NLI for Hallucination Detection
+============================================================
+
+[Step 1] Loading test data...
+Loading hallucination dataset (evaluation split)...
+Available splits: ['evaluation']
+Loaded 10 sentence-level samples from evaluation split
+
+Label distribution (binary):
+  Factual (0): 0
+  Hallucination (1): 10
+
+Label distribution (original):
+original_label
+accurate    10
+Name: count, dtype: int64
+
+[Step 2] Evaluating models on hallucination detection...
+
+##################################################
+Processing model: flan_t5_prompt
+##################################################
+Loading model from: google/flan-t5-base
+Loading weights:   0%|          | 0/282 [00:00<?, ?it/s]Loading weights: 100%|██████████| 282/282 [00:00<00:00, 3015.45it/s]
+[transformers] The tied weights mapping and config for this model specifies to tie shared.weight to lm_head.weight, but both are present in the checkpoints with different values, so we will NOT tie them. You should update the config with `tie_word_embeddings=False` to silence this warning.
+
+Evaluating flan_t5_prompt on hallucination detection...
+flan_t5_prompt:   0%|          | 0/5 [00:00<?, ?it/s]flan_t5_prompt:  20%|██        | 1/5 [00:00<00:01,  2.18it/s]flan_t5_prompt:  80%|████████  | 4/5 [00:00<00:00,  8.76it/s]flan_t5_prompt: 100%|██████████| 5/5 [00:00<00:00,  8.07it/s]
+/home/txueae/.local/lib/python3.10/site-packages/sklearn/metrics/_classification.py:1731: UndefinedMetricWarning: Recall is ill-defined and being set to 0.0 in labels with no true samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+/home/txueae/.local/lib/python3.10/site-packages/sklearn/metrics/_classification.py:1731: UndefinedMetricWarning: Recall is ill-defined and being set to 0.0 in labels with no true samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+/home/txueae/.local/lib/python3.10/site-packages/sklearn/metrics/_classification.py:1731: UndefinedMetricWarning: Recall is ill-defined and being set to 0.0 in labels with no true samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+
+==================================================
+Results for flan_t5_prompt
+==================================================
+Accuracy:  0.8000
+Precision: 1.0000
+Recall:    0.8000
+F1 Score:  0.8889
+
+Classification Report:
+               precision    recall  f1-score   support
+
+      factual       0.00      0.00      0.00         0
+hallucination       1.00      0.80      0.89         5
+
+     accuracy                           0.80         5
+    macro avg       0.50      0.40      0.44         5
+ weighted avg       1.00      0.80      0.89         5
+
+
+NLI label distribution:
+neutral       4
+entailment    1
+Name: count, dtype: int64
+  entailment: 1
+  neutral: 4
+  contradiction: 0
+
+##################################################
+Processing model: qwen_prompt
+##################################################
+Loading model from: Qwen/Qwen3-8B
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<04:33,  1.46it/s]Loading weights:  10%|▉         | 39/399 [00:00<00:05, 66.67it/s]Loading weights:  16%|█▌        | 62/399 [00:00<00:03, 88.26it/s]Loading weights:  20%|██        | 81/399 [00:01<00:03, 103.89it/s]Loading weights:  25%|██▍       | 99/399 [00:01<00:02, 118.45it/s]Loading weights:  29%|██▉       | 117/399 [00:01<00:02, 115.33it/s]Loading weights:  33%|███▎      | 133/399 [00:01<00:02, 124.94it/s]Loading weights:  37%|███▋      | 149/399 [00:01<00:02, 119.35it/s]Loading weights:  42%|████▏     | 166/399 [00:01<00:01, 129.66it/s]Loading weights:  45%|████▌     | 181/399 [00:01<00:01, 132.04it/s]Loading weights:  50%|████▉     | 199/399 [00:01<00:01, 142.95it/s]Loading weights:  54%|█████▍    | 215/399 [00:02<00:01, 129.25it/s]Loading weights:  58%|█████▊    | 233/399 [00:02<00:01, 139.48it/s]Loading weights:  62%|██████▏   | 248/399 [00:02<00:01, 133.68it/s]Loading weights:  66%|██████▋   | 265/399 [00:02<00:00, 139.05it/s]Loading weights:  70%|███████   | 280/399 [00:02<00:00, 130.22it/s]Loading weights:  75%|███████▍  | 298/399 [00:02<00:00, 136.67it/s]Loading weights:  79%|███████▊  | 314/399 [00:02<00:00, 139.89it/s]Loading weights:  83%|████████▎ | 331/399 [00:02<00:00, 139.34it/s]Loading weights:  87%|████████▋ | 346/399 [00:03<00:00, 133.72it/s]Loading weights:  91%|█████████ | 364/399 [00:03<00:00, 140.92it/s]Loading weights:  95%|█████████▍| 379/399 [00:03<00:00, 135.39it/s]Loading weights: 100%|██████████| 399/399 [00:03<00:00, 119.34it/s]
+
+Evaluating qwen_prompt on hallucination detection...
+qwen_prompt:   0%|          | 0/5 [00:00<?, ?it/s]qwen_prompt:  20%|██        | 1/5 [00:00<00:02,  1.95it/s]qwen_prompt:  40%|████      | 2/5 [00:00<00:01,  2.08it/s]qwen_prompt:  60%|██████    | 3/5 [00:01<00:00,  2.13it/s]qwen_prompt:  80%|████████  | 4/5 [00:01<00:00,  2.18it/s]qwen_prompt: 100%|██████████| 5/5 [00:02<00:00,  2.17it/s]qwen_prompt: 100%|██████████| 5/5 [00:02<00:00,  2.14it/s]
+
+==================================================
+Results for qwen_prompt
+==================================================
+Accuracy:  1.0000
+Precision: 1.0000
+Recall:    1.0000
+F1 Score:  1.0000
+
+Classification Report:
+Error evaluating qwen_prompt: Number of classes, 1, does not match size of target_names, 2. Try specifying the labels parameter
+
+##################################################
+Processing model: bert_finetuned_10000
+##################################################
+Loading model from: ./bert_finetuned_10000
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 7878.43it/s]
+
+Evaluating bert_finetuned_10000 on hallucination detection...
+bert_finetuned_10000:   0%|          | 0/5 [00:00<?, ?it/s]bert_finetuned_10000: 100%|██████████| 5/5 [00:00<00:00, 120.09it/s]
+/home/txueae/.local/lib/python3.10/site-packages/sklearn/metrics/_classification.py:1731: UndefinedMetricWarning: Recall is ill-defined and being set to 0.0 in labels with no true samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+/home/txueae/.local/lib/python3.10/site-packages/sklearn/metrics/_classification.py:1731: UndefinedMetricWarning: Recall is ill-defined and being set to 0.0 in labels with no true samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+/home/txueae/.local/lib/python3.10/site-packages/sklearn/metrics/_classification.py:1731: UndefinedMetricWarning: Recall is ill-defined and being set to 0.0 in labels with no true samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+
+==================================================
+Results for bert_finetuned_10000
+==================================================
+Accuracy:  0.8000
+Precision: 1.0000
+Recall:    0.8000
+F1 Score:  0.8889
+
+Classification Report:
+               precision    recall  f1-score   support
+
+      factual       0.00      0.00      0.00         0
+hallucination       1.00      0.80      0.89         5
+
+     accuracy                           0.80         5
+    macro avg       0.50      0.40      0.44         5
+ weighted avg       1.00      0.80      0.89         5
+
+
+NLI label distribution:
+neutral       4
+entailment    1
+Name: count, dtype: int64
+  entailment: 1
+  neutral: 4
+  contradiction: 0
+
+##################################################
+Processing model: bert_finetuned_50000
+##################################################
+Loading model from: ./bert_finetuned_50000
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 8981.00it/s]
+
+Evaluating bert_finetuned_50000 on hallucination detection...
+bert_finetuned_50000:   0%|          | 0/5 [00:00<?, ?it/s]bert_finetuned_50000: 100%|██████████| 5/5 [00:00<00:00, 166.88it/s]
+/home/txueae/.local/lib/python3.10/site-packages/sklearn/metrics/_classification.py:1731: UndefinedMetricWarning: Recall is ill-defined and being set to 0.0 in labels with no true samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+/home/txueae/.local/lib/python3.10/site-packages/sklearn/metrics/_classification.py:1731: UndefinedMetricWarning: Recall is ill-defined and being set to 0.0 in labels with no true samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+/home/txueae/.local/lib/python3.10/site-packages/sklearn/metrics/_classification.py:1731: UndefinedMetricWarning: Recall is ill-defined and being set to 0.0 in labels with no true samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+
+==================================================
+Results for bert_finetuned_50000
+==================================================
+Accuracy:  0.8000
+Precision: 1.0000
+Recall:    0.8000
+F1 Score:  0.8889
+
+Classification Report:
+               precision    recall  f1-score   support
+
+      factual       0.00      0.00      0.00         0
+hallucination       1.00      0.80      0.89         5
+
+     accuracy                           0.80         5
+    macro avg       0.50      0.40      0.44         5
+ weighted avg       1.00      0.80      0.89         5
+
+
+NLI label distribution:
+contradiction    3
+neutral          1
+entailment       1
+Name: count, dtype: int64
+  entailment: 1
+  neutral: 1
+  contradiction: 3
+Failure analysis:   0%|          | 0/5 [00:00<?, ?it/s]Failure analysis: 100%|██████████| 5/5 [00:00<00:00, 195.68it/s]
+
+Failure Case Analysis for bert_finetuned_50000:
+  False Positives (predicted hallucination, actual factual): 0
+  False Negatives (predicted factual, actual hallucination): 1
+
+  Sample False Negatives:
+  1. Premise: Honoré III (10 November 1720 - 21 March 1795) ruled as Prince of Monaco and was Duke of Valentinois ...
+     Hypothesis: He was born in Paris, the son of Jacques I, Prince of Monaco, and his wife, Louise Hippolyte Grimald...
+     Original label: accurate
+
+
+[Step 3] Saving results...
+
+============================================================
+Summary of Hallucination Detection Results
+============================================================
+               model  accuracy  precision  recall       f1
+      flan_t5_prompt       0.8        1.0     0.8 0.888889
+bert_finetuned_10000       0.8        1.0     0.8 0.888889
+bert_finetuned_50000       0.8        1.0     0.8 0.888889
+
+Results saved to hallucination_detection_results.csv
+Evaluation completed at Fri May  8 08:46:31 PM HKT 2026
