@@ -24,11 +24,18 @@ def predict(model, tokenizer, premise, hypothesis, model_key, shot=0):
     
     # ====================== GPT-2 / Qwen 等 Causal LM (Verbalizer 方式) ======================
     if "gpt" in model_key.lower() or "qwen" in model_key.lower():
-        prompt = f"""Premise: {premise}
+        prompt = f"""Task: Natural Language Inference (NLI)
+Given a Premise and a Hypothesis, determine their logical relationship.
+
+Premise: {premise}
 Hypothesis: {hypothesis}
 
-The relationship is:"""
+Possible relationships:
+- Entailment: The hypothesis is definitely true given the premise.
+- Contradiction: The hypothesis is definitely false given the premise.
+- Neutral: The hypothesis cannot be determined as true or false from the premise.
 
+The relationship is:"""
         inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
         
         with torch.no_grad():
