@@ -49,6 +49,13 @@ def load_model_and_tokenizer(model_name_or_path, task="causal"):
         model = AutoModelForSequenceClassification.from_pretrained(
             model_name_or_path, num_labels=3, ignore_mismatched_sizes=True
         )
+    elif "t5" in model_name_or_path.lower():
+        # Seq-to-Seq 模型
+        from transformers import AutoModelForSeq2SeqLM
+        model = AutoModelForSeq2SeqLM.from_pretrained(
+        model_name_or_path,
+        torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,  # 混合精度
+        )
     else:
         # Causal LM (GPT-2, Qwen 等)
         model = AutoModelForCausalLM.from_pretrained(
@@ -59,3 +66,18 @@ def load_model_and_tokenizer(model_name_or_path, task="causal"):
     
     model = model.to("cuda" if torch.cuda.is_available() else "cpu")
     return model, tokenizer
+
+def map_t5_output_to_label(output_text):
+    """将 T5 生成的文本映射到标签 ID"""
+    output_text = output_text.lower().strip()
+    
+    if "entailment" in output_text or "entail" in output_text:
+        return 0  # Entailment
+    elif "contradiction" in output_text or "contradict" in output_text:
+        return 1  # Contradiction
+    elif "neutral" in output_text:
+        return 2  # Neutral
+    else:
+        # 默认返回 Neutral
+        print(f"Warning: Unexpected T5 output '{output_text}', defaulting to Neutral")
+        return 2
