@@ -6,8 +6,6 @@ import numpy as np
 from sklearn.metrics import accuracy_score, f1_score
 import os
 
-print(f"Transformers version: {transformers.__version__}")
-
 model_name = "bert-base-uncased"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
