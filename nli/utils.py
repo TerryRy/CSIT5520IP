@@ -74,13 +74,13 @@ def map_t5_output_to_label(output_text):
     if "entailment" in output_text or "entail" in output_text:
         return 0  # entailment
     elif "contradiction" in output_text or "contradict" in output_text:
-        return 1  # contradiction
+        return 2  # contradiction
     elif "neutral" in output_text:
-        return 2  # neutral
+        return 1  # neutral
     else:
         # 默认返回 neutral
         print(f"Warning: Unexpected T5 output '{output_text}', defaulting to neutral")
-        return 2
+        return 1
     
 # utils.py 修改部分
 
