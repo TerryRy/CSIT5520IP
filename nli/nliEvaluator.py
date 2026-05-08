@@ -42,17 +42,7 @@ def sample_few_shot_examples(pool, shot, seed=None):
 
 
 def create_fewshot_prompt(premise, hypothesis, shot=0, seed=None):
-    prompt = f"""Task: Natural Language Inference
-Given a Premise and a Hypothesis, determine their logical relationship.
-
-Premise: {premise}
-Hypothesis: {hypothesis}
-
-Possible relationships:
-- entailment
-- contradiction
-- neutral
-"""
+    f"Premise: {premise}\nHypothesis: {hypothesis}\nLabel:"
     # 添加 few-shot 示例（使用随机抽样）
     if shot > 0:
         examples = sample_few_shot_examples(FEW_SHOT_EXAMPLE_POOL, shot, seed)
@@ -84,7 +74,7 @@ Possible relationships:
 def create_t5_prompt(premise, hypothesis, shot=0, seed=None):
     """T5 seq2seq prompt with random sampling"""
     
-    prompt = "nli: "
+    f"nli premise: {premise} hypothesis: {hypothesis}"
     
     if shot > 0:
         examples = sample_few_shot_examples(FEW_SHOT_EXAMPLE_POOL, shot, seed)
@@ -92,7 +82,7 @@ def create_t5_prompt(premise, hypothesis, shot=0, seed=None):
             prompt += f"premise: {ex['premise']} hypothesis: {ex['hypothesis']} answer: {ex['label']} "
     
     # 当前要预测的样本
-    prompt += f"premise: {premise} hypothesis: {hypothesis} answer:"
+    prompt += " answer:"
     
     return prompt
 
