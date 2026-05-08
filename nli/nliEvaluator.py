@@ -74,7 +74,7 @@ def create_fewshot_prompt(premise, hypothesis, shot=0, seed=None):
 def create_t5_prompt(premise, hypothesis, shot=0, seed=None):
     """T5 seq2seq prompt with random sampling"""
     
-    f"nli premise: {premise} hypothesis: {hypothesis}"
+    prompt = f"nli premise: {premise} hypothesis: {hypothesis}"
     
     if shot > 0:
         examples = sample_few_shot_examples(FEW_SHOT_EXAMPLE_POOL, shot, seed)
