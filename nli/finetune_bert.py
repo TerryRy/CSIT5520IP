@@ -10,7 +10,7 @@ model = AutoModelForSequenceClassification.from_pretrained(model_name, num_label
 
 # 加载完整训练集（课程允许）
 dataset = load_dataset("nyu-mll/multi_nli")
-train_dataset = dataset["train"].shuffle(seed=42).select(range(1000))  # 可减少样本加速
+train_dataset = dataset["train"].shuffle(seed=42).select(range(10000))  # 可减少样本加速
 
 def preprocess(examples):
     return tokenizer(examples["premise"], examples["hypothesis"], truncation=True, padding="max_length", max_length=256)

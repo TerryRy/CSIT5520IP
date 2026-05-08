@@ -113,50 +113,47 @@ def predict(model, tokenizer, premise, hypothesis, model_key, shot=0):
     id2label = {0: "Entailment", 1: "Neutral", 2: "Contradiction"}
     
     if "bert" in model_key.lower() or "deberta" in model_key.lower():
-        # === Classification Models ===
-        inputs = tokenizer(
-            premise, 
-            hypothesis, 
-            truncation=True, 
-            padding=True, 
-            max_length=256, 
-            return_tensors="pt"
-        )
+        # === 重要修复：加上 [SEP] 分隔符 ===
+        text_pair = f"{premise} [SEP] {hypothesis}"
+        
+        inputs = tokenizer(text_pair, 
+                          truncation=True, 
+                          padding=True, 
+                          max_length=256, 
+                          return_tensors="pt")
+        
         inputs = {k: v.to(model.device) for k, v in inputs.items()}
         
         with torch.no_grad():
             outputs = model(**inputs)
             logits = outputs.logits
-            probs = torch.softmax(logits, dim=-1)
+            probs = torch.softmax(logits, dim=-1)[0]
             pred_id = torch.argmax(logits, dim=-1).item()
-            prob = probs[0][pred_id].item()
+            prob = probs[pred_id].item()
         
         print(f"[{model_key}] Logits: {logits[0].cpu().numpy().round(3)} | "
-              f"Pred: {id2label[pred_id]} ({prob:.3f})")
-        
+              f"Probs: {probs.cpu().numpy().round(3)} | Pred: {id2label[pred_id]} ({prob:.3f})")
         return pred_id
     
     else:
-        # === Qwen ===
-        prompt = f"""Premise: {premise}
+        # Qwen 部分保持你当前的（或用下面更强的prompt）
+        prompt = f"""Task: Natural Language Inference
+Determine if the hypothesis is entailed by, contradicts, or is neutral to the premise.
+
+Premise: {premise}
 Hypothesis: {hypothesis}
 
-Relationship: Entailment, Neutral, or Contradiction?
-Answer (one word only):"""
+Answer with exactly one word: Entailment, Neutral or Contradiction.
+
+Answer: """
 
         inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-        
         with torch.no_grad():
-            outputs = model.generate(
-                **inputs,
-                max_new_tokens=10,
-                temperature=0.0,
-                do_sample=False,
-                pad_token_id=tokenizer.pad_token_id
-            )
+            outputs = model.generate(**inputs, max_new_tokens=8, temperature=0.0, 
+                                   do_sample=False, pad_token_id=tokenizer.pad_token_id)
         
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        answer = response.split("Answer")[-1].strip().lower() if "Answer" in response else response.lower()
+        answer = response[-100:].lower()
         
         if "entail" in answer:
             pred_id = 0
@@ -165,5 +162,5 @@ Answer (one word only):"""
         else:
             pred_id = 1
             
-        print(f"[Qwen] Raw response: {response[-100:]} → Pred: {id2label[pred_id]}")
+        print(f"[Qwen] Response: {response[-120:]} → Pred: {id2label[pred_id]}")
         return pred_id
