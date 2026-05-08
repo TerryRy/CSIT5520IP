@@ -21,5 +21,5 @@ echo "GPU Info:"
 nvidia-smi
 
 # ==================== 运行 ====================
-python run_py_finetune.sh
+python finetune_bert.py
 echo "Evaluation completed at $(date)"
