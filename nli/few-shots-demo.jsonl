@@ -1,0 +1,39 @@
+{ 
+    "gener1": {
+        "entailment": {
+            "gold_label": <someting>,
+            "premise": <someting>,
+            "hypothesis": <someting>
+        },
+        "neutral": {
+            "gold_label": <someting>,
+            "premise": <someting>,
+            "hypothesis": <someting>
+        },
+        "contradiction": {
+            "gold_label": <someting>,
+            "premise": <someting>,
+            "hypothesis": <someting>
+        }
+    }
+}    
+{
+    "gener2": {
+        "entailment": {
+            "gold_label": <someting>,
+            "premise": <someting>,
+            "hypothesis": <someting>
+        },
+        "neutral": {
+            "gold_label": <someting>,
+            "premise": <someting>,
+            "hypothesis": <someting>
+        },
+        "contradiction": {
+            "gold_label": <someting>,
+            "premise": <someting>,
+            "hypothesis": <someting>
+        }
+    }
+}
+<others>

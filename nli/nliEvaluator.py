@@ -1,14 +1,45 @@
 # nliEvaluator.py
-import torch
-from utils import id2label, verbalizer, map_t5_output_to_label
+import torch, random
+from utils import id2label, verbalizer, map_t5_output_to_label, load_few_shot_examples
 
+# 全局加载示例池（只加载一次）
+FEW_SHOT_EXAMPLE_POOL = load_few_shot_examples("few-shots.jsonl")
 
-FEW_SHOT_EXAMPLES = [
-    {"premise": "The man is in the kitchen.", "hypothesis": "The man is cooking dinner.", "label": "neutral"},
-    {"premise": "I am a lacto-vegetarian.", "hypothesis": "I enjoy eating cheese too much to abstain from dairy.", "label": "neutral"},
-    {"premise": "The Boston Center controller received a third transmission from American 11.", "hypothesis": "The Boston Center controller got a third transmission from American 11.", "label": "entailment"},
-    {"premise": "Met my first girlfriend that way.", "hypothesis": "I didn't meet my first girlfriend until later.", "label": "contradiction"},
-]
+def sample_few_shot_examples(pool, shot, seed=None):
+    """
+    随机抽样策略：
+    - 每类至少取 shot // 3 个（向上取整）
+    - 再从剩余中随机补充
+    """
+    if seed is not None:
+        random.seed(seed)
+    
+    examples = []
+    min_per_class = 1
+    labels = ["entailment", "neutral", "contradiction"]
+    
+    # 按标签分组
+    pool_by_label = {label: [] for label in labels}
+    for ex in pool:
+        pool_by_label[ex["label"]].append(ex)
+    
+    # 每类取 min_per_class 个
+    for label in labels:
+        candidates = pool_by_label[label].copy()
+        random.shuffle(candidates)
+        examples.extend(candidates[:min_per_class])
+    
+    # 如果还不够，从合并的剩余池中随机补充
+    if len(examples) < shot:
+        remaining = [ex for ex in pool if ex not in examples]
+        random.shuffle(remaining)
+        examples.extend(remaining[:shot - len(examples)])
+    
+    # 打乱顺序
+    random.shuffle(examples)
+    
+    return examples[:shot]
+
 
 def create_fewshot_prompt(premise, hypothesis, shot=0):
     prompt = f"""Task: Natural Language Inference
@@ -21,8 +52,21 @@ Possible relationships:
 - entailment
 - contradiction
 - neutral
-"""    # 添加 few-shot 示例
-
+"""
+    # 添加 few-shot 示例（使用随机抽样）
+    if shot > 0:
+        examples = sample_few_shot_examples(FEW_SHOT_EXAMPLE_POOL, shot, seed)
+        
+        prompt += "Here are some examples:\n\n"
+        for ex in examples:
+            prompt += f"Premise: {ex['premise']}\n"
+            prompt += f"Hypothesis: {ex['hypothesis']}\n"
+            prompt += f"Answer: {ex['label']}\n\n"
+        prompt += "Now analyze the following pair:\n\n"
+    
+    prompt += "\nThe relationship is:"
+    
+    return prompt
 
     if shot > 0:
         prompt += "Here are some examples:\n\n"
@@ -37,64 +81,21 @@ Possible relationships:
     return prompt
 
 # T5 prompt
-def create_t5_prompt(premise, hypothesis, shot=0):
-    """T5 seq2seq  prompt"""
+def create_t5_prompt(premise, hypothesis, shot=0, seed=None):
+    """T5 seq2seq prompt with random sampling"""
     
-    # T5 推荐的任务前缀
     prompt = "nli: "
     
-    prompt += f"premise: {premise} hypothesis: {hypothesis} \n"
-    
-    # 添加 few-shot 示例
     if shot > 0:
-        for ex in FEW_SHOT_EXAMPLES[:shot]:
+        examples = sample_few_shot_examples(FEW_SHOT_EXAMPLE_POOL, shot, seed)
+        for ex in examples:
             prompt += f"premise: {ex['premise']} hypothesis: {ex['hypothesis']} answer: {ex['label']} "
     
     # 当前要预测的样本
-    prompt += "answer:"
+    prompt += f"premise: {premise} hypothesis: {hypothesis} answer:"
     
     return prompt
 
-# 或者使用更详细的 T5 prompt
-def create_t5_prompt_detailed(premise, hypothesis, shot=0):
-    """更详细的 T5 prompt 格式"""
-    
-    if shot > 0:
-        prompt = "Classify the relationship between premise and hypothesis as entailment, contradiction, or neutral.\n\n"
-                
-        prompt += f"Premise: {premise}\n"
-        prompt += f"Hypothesis: {hypothesis}\n"
-        
-        for ex in FEW_SHOT_EXAMPLES[:shot]:
-            prompt += f"Premise: {ex['premise']}\n"
-            prompt += f"Hypothesis: {ex['hypothesis']}\n"
-            prompt += f"Answer: {ex['label']}\n\n"
-
-        prompt += "Answer:"
-    else:
-        prompt = f"Premise: {premise} Hypothesis: {hypothesis} Is the hypothesis entailed by the premise? Answer:"
-    
-    return prompt
-
-# Causal LM 的 prompt 也可以优化
-def create_causal_prompt(premise, hypothesis, shot=0):
-    """优化的 Causal LM prompt (GPT, Qwen 等)"""
-    
-    prompt = """You are an expert in natural language inference. Determine if the hypothesis follows from the premise.
-
-"""
-    
-    if shot > 0:
-        for ex in FEW_SHOT_EXAMPLES[:shot]:
-            prompt += f"Premise: {ex['premise']}\n"
-            prompt += f"Hypothesis: {ex['hypothesis']}\n"
-            prompt += f"Relationship: {ex['label']}\n\n"
-    
-    prompt += f"Premise: {premise}\n"
-    prompt += f"Hypothesis: {hypothesis}\n"
-    prompt += "Relationship:"
-    
-    return prompt
 
 def predict(model, tokenizer, premise, hypothesis, model_key, shot=0):
     

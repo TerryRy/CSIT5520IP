@@ -81,3 +81,35 @@ def map_t5_output_to_label(output_text):
         # 默认返回 neutral
         print(f"Warning: Unexpected T5 output '{output_text}', defaulting to neutral")
         return 2
+    
+# utils.py 修改部分
+
+def load_few_shot_examples(file_path="few-shots.jsonl"):
+    """
+    读取 few-shots.jsonl，每条json仅保留premise, hypothesis, label三个字段
+    返回格式: [{"premise": "...", "hypothesis": "...", "label": "entailment"}, ...]
+    """
+    examples = []
+    
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            if line.strip():
+                entry = json.loads(line)
+                # entry格式: {"genre_name": {"entailment": {...}, "neutral": {...}, "contradiction": {...}}}
+                for genre, labels_dict in entry.items():
+                    for label, data in labels_dict.items():
+                        examples.append({
+                            "premise": data["premise"],
+                            "hypothesis": data["hypothesis"],
+                            "label": data["gold_label"]  # 统一使用 gold_label
+                        })
+    
+    print(f"Loaded {len(examples)} few-shot examples")
+    
+    # 按标签统计
+    label_counts = {}
+    for ex in examples:
+        label_counts[ex["label"]] = label_counts.get(ex["label"], 0) + 1
+    print(f"Label distribution: {label_counts}")
+    
+    return examples
