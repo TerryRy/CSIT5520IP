@@ -2,7 +2,7 @@
 from datasets import load_dataset
 import pandas as pd
 from sklearn.metrics import accuracy_score
-from nliEvaluator import predict_prompting
+from nliEvaluator import predict
 from tqdm import tqdm
 from utils import load_model_and_tokenizer, MODELS, load_multinli_jsonl
 
@@ -21,7 +21,7 @@ def evaluate_dataset(df, model_key, shot=0):
                                                 task="causal" if "qwen" in model_key else "classification")
     preds = []
     for _, row in tqdm(df.iterrows(), total=len(df)):
-        pred = predict_prompting(model, tokenizer, row['premise'], row['hypothesis'], shot=shot)
+        pred = predict(model, tokenizer, row['premise'], row['hypothesis'], model_key, shot=shot)
         preds.append(pred)
     
     acc = accuracy_score(df['label'], preds)
