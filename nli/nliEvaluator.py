@@ -112,7 +112,7 @@ def predict(model, tokenizer, premise, hypothesis, model_key, shot=0):
             pred_id = torch.argmax(torch.tensor(scores)).item()
             # probs = torch.softmax(torch.tensor(scores), dim=-1)
         
-        print(f"[{model_key} {shot}-shot] Scores: {[round(s,3) for s in scores]} → {id2label[pred_id]}")
+        # print(f"[{model_key} {shot}-shot] Scores: {[round(s,3) for s in scores]} → {id2label[pred_id]}")
         return pred_id
     
     elif "t5" in model_key.lower():
@@ -137,7 +137,7 @@ def predict(model, tokenizer, premise, hypothesis, model_key, shot=0):
         # 映射到三个类别
         pred_id = map_t5_output_to_label(generated_text)
         
-        print(f"[{model_key} {shot}-shot] Output: '{generated_text}' → {id2label[pred_id]}")
+        # print(f"[{model_key} {shot}-shot] Output: '{generated_text}' → {id2label[pred_id]}")
         return pred_id
     
     else:

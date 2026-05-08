@@ -13,8 +13,8 @@ shots = [0, 1, 3]
 # =============================================
 
 # 加载课程提供的两个数据集
-matched = load_multinli_jsonl("dev_matched_sampled-1.jsonl").head(10)     # ← 修改为你的实际文件名
-mismatched = load_multinli_jsonl("dev_mismatched_sampled-1.jsonl").head(10) # ← 修改为你的实际文件名
+matched = load_multinli_jsonl("dev_matched_sampled-1.jsonl").head(100)     # ← 修改为你的实际文件名
+mismatched = load_multinli_jsonl("dev_mismatched_sampled-1.jsonl").head(100) # ← 修改为你的实际文件名
 
 def evaluate_dataset(df, model_key, shot=0):
     model, tokenizer = load_model_and_tokenizer(MODELS[model_key], 
@@ -22,7 +22,7 @@ def evaluate_dataset(df, model_key, shot=0):
     preds = []
     for _, row in tqdm(df.iterrows(), total=len(df)):
         pred = predict(model, tokenizer, row['premise'], row['hypothesis'], model_key, shot=shot)
-        print(f"{model_key} (shot={shot}) pred: {id2label[pred]} gold: {row['label']}") 
+        # print(f"{model_key} (shot={shot}) pred: {id2label[pred]} gold: {row['label']}") 
         preds.append(id2label[pred])
     
     acc = accuracy_score(df['label'], preds)
