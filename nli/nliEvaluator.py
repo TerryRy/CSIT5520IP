@@ -44,15 +44,15 @@ def sample_few_shot_examples(pool, shot, seed=None):
 def create_fewshot_prompt(premise, hypothesis, shot=0, seed=None):
     prompt = f"Premise: {premise}\nHypothesis: {hypothesis}\nLabel:"
     # 添加 few-shot 示例（使用随机抽样）
-    if shot > 0:
-        examples = sample_few_shot_examples(FEW_SHOT_EXAMPLE_POOL, shot, seed)
+    # if shot > 0:
+    #     examples = sample_few_shot_examples(FEW_SHOT_EXAMPLE_POOL, shot, seed)
         
-        prompt += "Here are some examples:\n\n"
-        for ex in examples:
-            prompt += f"Premise: {ex['premise']}\n"
-            prompt += f"Hypothesis: {ex['hypothesis']}\n"
-            prompt += f"Answer: {ex['label']}\n\n"
-        prompt += "Now analyze the following pair:\n\n"
+    #     prompt += "Here are some examples:\n\n"
+    #     for ex in examples:
+    #         prompt += f"Premise: {ex['premise']}\n"
+    #         prompt += f"Hypothesis: {ex['hypothesis']}\n"
+    #         prompt += f"Answer: {ex['label']}\n\n"
+    #     prompt += "Now analyze the following pair:\n\n"
     
     prompt += "\nThe relationship is:"
     
@@ -76,10 +76,10 @@ def create_t5_prompt(premise, hypothesis, shot=0, seed=None):
     
     prompt = f"nli premise: {premise} hypothesis: {hypothesis}"
     
-    if shot > 0:
-        examples = sample_few_shot_examples(FEW_SHOT_EXAMPLE_POOL, shot, seed)
-        for ex in examples:
-            prompt += f"premise: {ex['premise']} hypothesis: {ex['hypothesis']} answer: {ex['label']} "
+    # if shot > 0:
+    #     examples = sample_few_shot_examples(FEW_SHOT_EXAMPLE_POOL, shot, seed)
+    #     for ex in examples:
+    #         prompt += f"premise: {ex['premise']} hypothesis: {ex['hypothesis']} answer: {ex['label']} "
     
     # 当前要预测的样本
     prompt += " answer:"
