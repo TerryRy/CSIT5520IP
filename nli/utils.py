@@ -134,7 +134,9 @@ def load_hallucination_data(split="evaluation", max_samples=None):
     print(f"Available splits: {list(dataset.keys())}")
     
     data = []
+    
     for item in dataset[split]:
+        print(f"annotation values: {item['annotation']}")
         wiki_bio_text = item["wiki_bio_text"]  # premise
         gpt3_sentences = item["gpt3_sentences"]  # list of hypotheses
         annotations = item["annotation"]  # list of labels
