@@ -121,7 +121,7 @@ def predict(model, tokenizer, premise, hypothesis, model_key, shot=0):
     
     elif "t5" in model_key.lower():
         # T5 Seq2Seq 推理
-        prompt = create_t5_prompt_detailed(premise, hypothesis, shot)
+        prompt = create_t5_prompt(premise, hypothesis, shot)
         
         inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512).to(model.device)
         
