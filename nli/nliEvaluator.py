@@ -3,28 +3,15 @@ import torch
 from utils import id2label, verbalizer
 
 
-def create_prompt(premise, hypothesis, shot=0):
-    base = f"""Premise: {premise}
-Hypothesis: {hypothesis}
+FEW_SHOT_EXAMPLES = [
+    {"premise": "The man is in the kitchen.", "hypothesis": "The man is cooking dinner.", "label": "Neutral"},
+    {"premise": "I am a lacto-vegetarian.", "hypothesis": "I enjoy eating cheese too much to abstain from dairy.", "label": "Neutral"},
+    {"premise": "The Boston Center controller received a third transmission from American 11.", "hypothesis": "The Boston Center controller got a third transmission from American 11.", "label": "Entailment"},
+    {"premise": "Met my first girlfriend that way.", "hypothesis": "I didn't meet my first girlfriend until later.", "label": "Contradiction"},
+]
 
-Determine the relationship: Entailment, Neutral, or Contradiction.
-Answer with exactly one word.
-
-Answer:"""
-    # 可以后续加 few-shot examples
-    return base
-
-
-# nliEvaluator.py
-import torch
-
-
-
-def predict(model, tokenizer, premise, hypothesis, model_key, shot=0):
-    
-    # ====================== GPT-2 / Qwen 等 Causal LM (Verbalizer 方式) ======================
-    if "gpt" in model_key.lower() or "qwen" in model_key.lower():
-        prompt = f"""Task: Natural Language Inference (NLI)
+def create_fewshot_prompt(premise, hypothesis, shot=0):
+    prompt = f"""Task: Natural Language Inference (NLI)
 Given a Premise and a Hypothesis, determine their logical relationship.
 
 Premise: {premise}
@@ -34,42 +21,51 @@ Possible relationships:
 - Entailment: The hypothesis is definitely true given the premise.
 - Contradiction: The hypothesis is definitely false given the premise.
 - Neutral: The hypothesis cannot be determined as true or false from the premise.
+"""    # 添加 few-shot 示例
 
-The relationship is:"""
+
+    if shot > 0:
+        prompt += "Here are some examples:\n\n"
+        for ex in FEW_SHOT_EXAMPLES[:shot]:
+            prompt += f"Premise: {ex['premise']}\n"
+            prompt += f"Hypothesis: {ex['hypothesis']}\n"
+            prompt += f"Answer: {ex['label']}\n\n"
+        prompt += "Now analyze the following pair:\n\n"
+    
+    prompt += "\nThe relationship is:"
+    
+    return prompt
+
+
+def predict(model, tokenizer, premise, hypothesis, model_key, shot=0):
+    
+    if "gpt" in model_key.lower() or "qwen" in model_key.lower():
+        prompt = create_fewshot_prompt(premise, hypothesis, shot)
+        
         inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
         
         with torch.no_grad():
             outputs = model(**inputs)
-            next_token_logits = outputs.logits[0, -1, :]   # 最后一个位置的 logits
+            next_token_logits = outputs.logits[0, -1, :]
             
-            # 计算 verbalizer 中每个词的概率
             scores = []
             for word in verbalizer:
                 token_id = tokenizer.encode(word, add_special_tokens=False)[0]
                 scores.append(next_token_logits[token_id].item())
             
-            probs = torch.softmax(torch.tensor(scores), dim=-1)
             pred_id = torch.argmax(torch.tensor(scores)).item()
-            best_prob = probs[pred_id].item()
+            probs = torch.softmax(torch.tensor(scores), dim=-1)
         
-        print(f"[{model_key} Verbalizer] Scores: { [round(s,3) for s in scores] } | "
-              f"Probs: {probs.numpy().round(3)} → Pred: {id2label[pred_id]} ({best_prob:.3f})")
+        print(f"[{model_key} {shot}-shot] Scores: {[round(s,3) for s in scores]} → {id2label[pred_id]}")
         return pred_id
-
-    # ====================== BERT / DeBERTa / Finetuned (Classification) ======================
+    
     else:
-        inputs = tokenizer(premise, hypothesis, 
-                          truncation=True, 
-                          padding=True, 
-                          max_length=256, 
-                          return_tensors="pt")
+        # BERT-finetuned 等分类模型
+        inputs = tokenizer(premise, hypothesis, truncation=True, padding=True, max_length=256, return_tensors="pt")
         inputs = {k: v.to(model.device) for k, v in inputs.items()}
         
         with torch.no_grad():
             outputs = model(**inputs)
-            logits = outputs.logits
-            pred_id = torch.argmax(logits, dim=-1).item()
-            probs = torch.softmax(logits, dim=-1)[0]
-        
-        print(f"[{model_key}] Probs: {probs.cpu().numpy().round(3)} → Pred: {id2label[pred_id]}")
+            pred_id = torch.argmax(outputs.logits, dim=-1).item()
         return pred_id
+    

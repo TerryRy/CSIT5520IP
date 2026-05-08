@@ -11,9 +11,9 @@ verbalizer = ["Entailment", "Neutral", "Contradiction"]
 
 MODELS = {
     "gpt2_prompt": "gpt2",                    # Causal LM Prompting（经典示例）
-    # "flan_t5_prompt": "google/flan-t5-base",  # Seq-to-Seq Prompting（效果较好）
+    "flan_t5_prompt": "google/flan-t5-base",  # Seq-to-Seq Prompting（效果较好）
     "qwen_prompt": "Qwen/Qwen3-8B",           # 你已有的强模型
-    # "bert_finetuned": "./bert_finetuned"      # Fine-tuning 代表
+    "bert_finetuned": "./bert_finetuned"      # Fine-tuning 代表
 }
 
 def load_multinli_jsonl(file_path: str) -> pd.DataFrame:
