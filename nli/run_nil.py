@@ -22,7 +22,7 @@ def evaluate_dataset(df, model_key, shot=0):
     preds = []
     for _, row in tqdm(df.iterrows(), total=len(df)):
         pred = predict(model, tokenizer, row['premise'], row['hypothesis'], model_key, shot=shot)
-        print(f"{model_key} (shot={shot}) pred: {pred}") 
+        print(f"{model_key} (shot={shot}) pred: {pred} gold: {row['label']}") 
         preds.append(pred)
     
     acc = accuracy_score(df['label'], preds)
