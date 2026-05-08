@@ -1,11 +1,12 @@
-# bias_evaluator.py (移除matplotlib依赖)
+# bias_evaluator.py (使用直接下载方式)
 import torch
 import json
 import numpy as np
 import pandas as pd
 from transformers import AutoTokenizer, AutoModelForMaskedLM
 from tqdm import tqdm
-from datasets import load_dataset
+import requests
+import os
 
 # ================== 配置 ==================
 SELECTED_DOMAIN = "gender/gender identity"
@@ -19,32 +20,44 @@ MAX_SAMPLES = 80
 # ==========================================
 
 
+def download_crows_pairs():
+    """直接从GitHub下载CrowS-Pairs数据"""
+    url = "https://raw.githubusercontent.com/nyu-mll/crows-pairs/master/data/crows_pairs_anonymized.csv"
+    
+    print(f"Downloading CrowS-Pairs from GitHub...")
+    df = pd.read_csv(url)
+    print(f"Downloaded {len(df)} pairs")
+    print(f"Available domains: {df['bias_type'].unique()}")
+    return df
+
+
 def load_crows_pairs(domain, max_samples=80):
-    """加载CrowS-Pairs数据集"""
-    print(f"Loading CrowS-Pairs dataset for domain: {domain}")
+    """加载CrowS-Pairs数据集的指定领域"""
+    print(f"Loading pairs for domain: {domain}")
     
-    dataset = load_dataset("crows_pairs", trust_remote_code=True)
-    
-    print(f"Dataset splits: {list(dataset.keys())}")
+    # 下载数据
+    df = download_crows_pairs()
     
     # 过滤指定领域
-    domain_data = []
-    for item in dataset["test"]:
-        if item["bias_type"] == domain:
-            domain_data.append({
-                "sent_more": item["sent_more"],
-                "sent_less": item["sent_less"],
-                "stereotyping": item["stereotyping"],
-            })
+    domain_df = df[df["bias_type"] == domain]
     
-    print(f"Total pairs for '{domain}': {len(domain_data)}")
+    print(f"Total pairs for '{domain}': {len(domain_df)}")
+    
+    # 转换为列表
+    pairs = []
+    for _, row in domain_df.iterrows():
+        pairs.append({
+            "sent_more": row["sent_more"],
+            "sent_less": row["sent_less"],
+            "stereotyping": row["stereotyping"],
+        })
     
     # 采样
-    if len(domain_data) > max_samples:
-        domain_data = np.random.RandomState(42).choice(domain_data, max_samples, replace=False).tolist()
+    if len(pairs) > max_samples:
+        pairs = np.random.RandomState(42).choice(pairs, max_samples, replace=False).tolist()
         print(f"Sampled {max_samples} pairs")
     
-    return domain_data
+    return pairs
 
 
 def compute_pseudo_log_likelihood(model, tokenizer, sentence):
@@ -53,7 +66,6 @@ def compute_pseudo_log_likelihood(model, tokenizer, sentence):
     
     inputs = tokenizer(sentence, return_tensors="pt", truncation=True, max_length=128)
     input_ids = inputs["input_ids"][0]
-    tokens = tokenizer.convert_ids_to_tokens(input_ids)
     
     total_log_likelihood = 0.0
     num_tokens = 0
@@ -147,12 +159,12 @@ def evaluate_bias(model_path, pairs, model_name):
 
 
 def print_results_table(all_scores, domain):
-    """打印结果表格（代替matplotlib）"""
-    print("\n" + "=" * 50)
+    """打印结果表格"""
+    print("\n" + "=" * 60)
     print(f"Results Summary - Domain: {domain}")
-    print("=" * 50)
+    print("=" * 60)
     print(f"{'Model':<25} {'Bias Score':<15} {'Judgment'}")
-    print("-" * 50)
+    print("-" * 60)
     
     for model, score in all_scores.items():
         if model == "domain":
@@ -165,7 +177,7 @@ def print_results_table(all_scores, domain):
             judgment = "✅ Unbiased"
         print(f"{model:<25} {score:.2f}%{'':<10} {judgment}")
     
-    print("=" * 50)
+    print("=" * 60)
     print(f"Ideal (unbiased) score: 50.00%")
 
 
