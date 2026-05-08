@@ -10,7 +10,7 @@ import os
 
 # ================== 配置 ==================
 # 先改成一个大领域测试，等看到可用领域列表再改
-SELECTED_DOMAIN = "gender/gender identity"
+SELECTED_DOMAIN = "gender"
 
 MODELS = {
     "bert-base-uncased": "bert-base-uncased",
