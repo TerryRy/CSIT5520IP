@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.metrics import accuracy_score
 from nliEvaluator import predict_prompting
 from tqdm import tqdm
-from .utils import load_model_and_tokenizer, MODELS, load_multinli_jsonl
+from utils import load_model_and_tokenizer, MODELS, load_multinli_jsonl
 
 # ================== 配置区域 ==================
 

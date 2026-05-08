@@ -3,7 +3,7 @@ from datasets import load_dataset
 import pandas as pd
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from nliEvaluator import predict_prompting
-from .utils import load_model_and_tokenizer, MODELS
+from utils import load_model_and_tokenizer, MODELS
 from tqdm import tqdm
 
 dataset = load_dataset("potsawee/wiki_bio_gpt3_hallucination", split="evaluation")
