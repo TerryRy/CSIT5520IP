@@ -4,6 +4,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, Auto
 import pandas as pd
 from tqdm import tqdm
 import json
+from datasets import load_dataset
 
 label2id = {"entailment": 0, "neutral": 1, "contradiction": 2}
 id2label = {0: "entailment", 1: "neutral", 2: "contradiction"}
@@ -117,3 +118,60 @@ def load_few_shot_examples(file_path="few-shots.jsonl"):
     print(f"Label distribution: {label_counts}")
     
     return examples
+
+def load_hallucination_data(split="evaluation", max_samples=None):
+    """
+    加载 wikibio-gpt3-hallucination 数据集
+    
+    Args:
+        split: 可选 "train" 或 "evaluation"（没有 test 分割）
+        max_samples: 限制样本数量
+    """
+    print(f"Loading hallucination dataset ({split} split)...")
+    
+    # 检查可用分割
+    dataset = load_dataset("potsawee/wiki_bio_gpt3_hallucination")
+    print(f"Available splits: {list(dataset.keys())}")
+    
+    data = []
+    for item in dataset[split]:
+        wiki_bio_text = item["wiki_bio_text"]  # premise
+        gpt3_sentences = item["gpt3_sentences"]  # list of hypotheses
+        annotations = item["annotation"]  # list of labels
+        
+        for sentence, annotation in zip(gpt3_sentences, annotations):
+            # 标签映射
+            if annotation == 0:
+                binary_label = 0  # factual
+            else:
+                binary_label = 1  # hallucination
+            
+            if annotation == 1:
+                original_label = "major_inaccurate"
+            elif annotation == 0.5:
+                original_label = "minor_inaccurate"
+            else:
+                original_label = "accurate"
+            
+            data.append({
+                "premise": wiki_bio_text,
+                "hypothesis": sentence,
+                "original_label": original_label,
+                "binary_label": binary_label,
+                "annotation": annotation
+            })
+    
+    df = pd.DataFrame(data)
+    
+    # 限制样本数量（用于快速验证）
+    if max_samples and len(df) > max_samples:
+        df = df.sample(n=max_samples, random_state=42)
+    
+    print(f"Loaded {len(df)} sentence-level samples from {split} split")
+    print(f"\nLabel distribution (binary):")
+    print(f"  Factual (0): {(df['binary_label'] == 0).sum()}")
+    print(f"  Hallucination (1): {(df['binary_label'] == 1).sum()}")
+    print(f"\nLabel distribution (original):")
+    print(df['original_label'].value_counts())
+    
+    return df
