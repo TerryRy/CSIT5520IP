@@ -7,7 +7,7 @@ import json
 
 label2id = {"entailment": 0, "neutral": 1, "contradiction": 2}
 id2label = {0: "entailment", 1: "neutral", 2: "contradiction"}
-verbalizer = ["Entailment", "Neutral", "Contradiction"]
+verbalizer = ["entailment", "neutral", "contradiction"]
 
 MODELS = {
     "gpt2_prompt": "gpt2",                    # Causal LM Prompting（经典示例）
@@ -72,12 +72,12 @@ def map_t5_output_to_label(output_text):
     output_text = output_text.lower().strip()
     
     if "entailment" in output_text or "entail" in output_text:
-        return 0  # Entailment
+        return 0  # entailment
     elif "contradiction" in output_text or "contradict" in output_text:
-        return 1  # Contradiction
+        return 1  # contradiction
     elif "neutral" in output_text:
-        return 2  # Neutral
+        return 2  # neutral
     else:
-        # 默认返回 Neutral
-        print(f"Warning: Unexpected T5 output '{output_text}', defaulting to Neutral")
+        # 默认返回 neutral
+        print(f"Warning: Unexpected T5 output '{output_text}', defaulting to neutral")
         return 2

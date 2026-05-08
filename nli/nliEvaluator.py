@@ -4,23 +4,23 @@ from utils import id2label, verbalizer, map_t5_output_to_label
 
 
 FEW_SHOT_EXAMPLES = [
-    {"premise": "The man is in the kitchen.", "hypothesis": "The man is cooking dinner.", "label": "Neutral"},
-    {"premise": "I am a lacto-vegetarian.", "hypothesis": "I enjoy eating cheese too much to abstain from dairy.", "label": "Neutral"},
-    {"premise": "The Boston Center controller received a third transmission from American 11.", "hypothesis": "The Boston Center controller got a third transmission from American 11.", "label": "Entailment"},
-    {"premise": "Met my first girlfriend that way.", "hypothesis": "I didn't meet my first girlfriend until later.", "label": "Contradiction"},
+    {"premise": "The man is in the kitchen.", "hypothesis": "The man is cooking dinner.", "label": "neutral"},
+    {"premise": "I am a lacto-vegetarian.", "hypothesis": "I enjoy eating cheese too much to abstain from dairy.", "label": "neutral"},
+    {"premise": "The Boston Center controller received a third transmission from American 11.", "hypothesis": "The Boston Center controller got a third transmission from American 11.", "label": "entailment"},
+    {"premise": "Met my first girlfriend that way.", "hypothesis": "I didn't meet my first girlfriend until later.", "label": "contradiction"},
 ]
 
 def create_fewshot_prompt(premise, hypothesis, shot=0):
-    prompt = f"""Task: Natural Language Inference (NLI)
+    prompt = f"""Task: Natural Language Inference
 Given a Premise and a Hypothesis, determine their logical relationship.
 
 Premise: {premise}
 Hypothesis: {hypothesis}
 
 Possible relationships:
-- Entailment: The hypothesis is definitely true given the premise.
-- Contradiction: The hypothesis is definitely false given the premise.
-- Neutral: The hypothesis cannot be determined as true or false from the premise.
+- entailment
+- contradiction
+- neutral
 """    # 添加 few-shot 示例
 
 
@@ -43,13 +43,15 @@ def create_t5_prompt(premise, hypothesis, shot=0):
     # T5 推荐的任务前缀
     prompt = "nli: "
     
+    prompt += f"premise: {premise} hypothesis: {hypothesis} \n"
+    
     # 添加 few-shot 示例
     if shot > 0:
         for ex in FEW_SHOT_EXAMPLES[:shot]:
             prompt += f"premise: {ex['premise']} hypothesis: {ex['hypothesis']} answer: {ex['label']} "
     
     # 当前要预测的样本
-    prompt += f"premise: {premise} hypothesis: {hypothesis} answer:"
+    prompt += "answer:"
     
     return prompt
 
@@ -58,15 +60,16 @@ def create_t5_prompt_detailed(premise, hypothesis, shot=0):
     """更详细的 T5 prompt 格式"""
     
     if shot > 0:
-        prompt = "Classify the relationship between premise and hypothesis as Entailment, Contradiction, or Neutral.\n\n"
+        prompt = "Classify the relationship between premise and hypothesis as entailment, contradiction, or neutral.\n\n"
+                
+        prompt += f"Premise: {premise}\n"
+        prompt += f"Hypothesis: {hypothesis}\n"
         
         for ex in FEW_SHOT_EXAMPLES[:shot]:
             prompt += f"Premise: {ex['premise']}\n"
             prompt += f"Hypothesis: {ex['hypothesis']}\n"
             prompt += f"Answer: {ex['label']}\n\n"
-        
-        prompt += f"Premise: {premise}\n"
-        prompt += f"Hypothesis: {hypothesis}\n"
+
         prompt += "Answer:"
     else:
         prompt = f"Premise: {premise} Hypothesis: {hypothesis} Is the hypothesis entailed by the premise? Answer:"
@@ -117,7 +120,7 @@ def predict(model, tokenizer, premise, hypothesis, model_key, shot=0):
     
     elif "t5" in model_key.lower():
         # T5 Seq2Seq 推理
-        prompt = create_t5_prompt(premise, hypothesis, shot)
+        prompt = create_t5_prompt_detailed(premise, hypothesis, shot)
         
         inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512).to(model.device)
         
