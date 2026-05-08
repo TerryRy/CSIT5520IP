@@ -7,11 +7,13 @@ import json
 
 label2id = {"entailment": 0, "neutral": 1, "contradiction": 2}
 id2label = {0: "entailment", 1: "neutral", 2: "contradiction"}
+verbalizer = ["Entailment", "Neutral", "Contradiction"]
+
 MODELS = {
-    "bert_prompt": "bert-base-uncased",
-    "deberta_prompt": "microsoft/deberta-base",
-    "qwen_prompt": "Qwen/Qwen3-8B",          # 改成你的实际路径
-    "bert_finetuned": "./bert_finetuned"     # fine-tune 后路径
+    "gpt2_prompt": "gpt2",                    # Causal LM Prompting（经典示例）
+    # "flan_t5_prompt": "google/flan-t5-base",  # Seq-to-Seq Prompting（效果较好）
+    "qwen_prompt": "Qwen/Qwen3-8B",           # 你已有的强模型
+    # "bert_finetuned": "./bert_finetuned"      # Fine-tuning 代表
 }
 
 def load_multinli_jsonl(file_path: str) -> pd.DataFrame:
