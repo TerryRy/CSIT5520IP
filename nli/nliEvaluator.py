@@ -117,42 +117,56 @@ label_words = ["entailment", "neutral", "contradiction"]   # verbalizer
 
 def predict(model, tokenizer, premise, hypothesis, model_key, shot=0):
     
-    # ===================== BERT / DeBERTa Prompting =====================
+    # ====================== 1. BERT / DeBERTa Prompting (MLM) ======================
     if "bert" in model_key.lower() or "deberta" in model_key.lower():
+        # 更强的 Prompt（增加了结构化信息）
         prompt = f"""Premise: {premise}
 Hypothesis: {hypothesis}
 
-The relationship between premise and hypothesis is [MASK]."""
+Question: Does the hypothesis entail, contradict, or is it neutral to the premise?
+Answer: The relationship is [MASK]."""
 
         inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512)
         inputs = {k: v.to(model.device) for k, v in inputs.items()}
         
-        mask_token_index = (inputs['input_ids'] == tokenizer.mask_token_id).nonzero(as_tuple=True)[1]
+        # 找到 [MASK] 的位置
+        mask_token_id = tokenizer.mask_token_id
+        mask_positions = (inputs['input_ids'] == mask_token_id).nonzero()
+        
+        if len(mask_positions) == 0:
+            print(f"[{model_key}] Warning: No [MASK] found!")
+            return 1
+        
+        mask_idx = mask_positions[0, 1].item()   # 修复索引错误
         
         with torch.no_grad():
             outputs = model(**inputs)
-            logits = outputs.logits[0, mask_token_index, :]
+            logits = outputs.logits[0, mask_idx]   # 正确取第0个样本、mask位置的logits
             
-            # 只看 entailment/neutral/contradiction 这三个词的概率
+            # 计算 label_words 词的得分
             scores = []
             for word in label_words:
                 token_id = tokenizer.encode(word, add_special_tokens=False)[0]
-                scores.append(logits[0, token_id].item())
+                scores.append(logits[token_id].item())
             
             pred_id = torch.argmax(torch.tensor(scores)).item()
         
-        print(f"[{model_key} Prompt] Scores: {scores} → Pred: {id2label[pred_id]}")
+        print(f"[{model_key} MLM] Scores {label_words}: { [round(s,3) for s in scores] } → Pred: {id2label[pred_id]}")
         return pred_id
 
-    # ===================== Qwen Prompting =====================
+    # ====================== 2. Qwen ======================
     else:
-        prompt = f"""You are an expert in Natural Language Inference.
+        prompt = f"""You are an expert in Natural Language Inference (NLI).
 
 Premise: {premise}
 Hypothesis: {hypothesis}
 
-Determine the relationship. Reply with **EXACTLY ONE WORD** only:
-Entailment, Neutral, or Contradiction
+Determine the relationship. 
+You **must** answer with exactly one of the following words and nothing else:
+
+Entailment
+Neutral
+Contradiction
 
 Answer:"""
 
@@ -161,7 +175,7 @@ Answer:"""
         with torch.no_grad():
             outputs = model.generate(
                 **inputs,
-                max_new_tokens=6,
+                max_new_tokens=5,
                 temperature=0.0,
                 do_sample=False,
                 pad_token_id=tokenizer.pad_token_id,
@@ -178,5 +192,5 @@ Answer:"""
         else:
             pred_id = 1
             
-        print(f"[Qwen] Raw: '{response[-150:]}' → Pred: {id2label[pred_id]}")
+        print(f"[Qwen] Raw: '{response[-180:]}' → Pred: {id2label[pred_id]}")
         return pred_id
