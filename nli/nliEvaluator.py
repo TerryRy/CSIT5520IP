@@ -41,7 +41,7 @@ def sample_few_shot_examples(pool, shot, seed=None):
     return examples[:shot]
 
 
-def create_fewshot_prompt(premise, hypothesis, shot=0):
+def create_fewshot_prompt(premise, hypothesis, shot=0, seed=None):
     prompt = f"""Task: Natural Language Inference
 Given a Premise and a Hypothesis, determine their logical relationship.
 
