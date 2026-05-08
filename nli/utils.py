@@ -136,31 +136,28 @@ def load_hallucination_data(split="evaluation", max_samples=None):
     data = []
     
     for item in dataset[split]:
-        print(f"annotation values: {item['annotation']}")
         wiki_bio_text = item["wiki_bio_text"]  # premise
         gpt3_sentences = item["gpt3_sentences"]  # list of hypotheses
         annotations = item["annotation"]  # list of labels
         
         for sentence, annotation in zip(gpt3_sentences, annotations):
             # 标签映射
-            if annotation == 0:
+            if annotation == "accurate":
                 binary_label = 0  # factual
-            else:
+            elif annotation in ["minor_inaccurate", "major_inaccurate"]:
                 binary_label = 1  # hallucination
-            
-            if annotation == 1:
-                original_label = "major_inaccurate"
-            elif annotation == 0.5:
-                original_label = "minor_inaccurate"
+                
             else:
-                original_label = "accurate"
+                print(f"Unknown annotation: {annotation}")
+                continue
+            
+            original_label = annotation
             
             data.append({
                 "premise": wiki_bio_text,
                 "hypothesis": sentence,
                 "original_label": original_label,
                 "binary_label": binary_label,
-                "annotation": annotation
             })
     
     df = pd.DataFrame(data)
