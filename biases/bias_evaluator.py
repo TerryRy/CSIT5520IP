@@ -1,4 +1,4 @@
-# bias_evaluator.py (使用直接下载方式)
+# bias_evaluator.py (修复版 - 先打印可用领域)
 import torch
 import json
 import numpy as np
@@ -9,6 +9,7 @@ import requests
 import os
 
 # ================== 配置 ==================
+# 先改成一个大领域测试，等看到可用领域列表再改
 SELECTED_DOMAIN = "gender/gender identity"
 
 MODELS = {
@@ -27,21 +28,44 @@ def download_crows_pairs():
     print(f"Downloading CrowS-Pairs from GitHub...")
     df = pd.read_csv(url)
     print(f"Downloaded {len(df)} pairs")
-    print(f"Available domains: {df['bias_type'].unique()}")
     return df
+
+
+def print_available_domains(df):
+    """打印所有可用的领域及其数据量"""
+    print("\nAvailable domains:")
+    print("-" * 50)
+    for domain in df['bias_type'].unique():
+        count = len(df[df['bias_type'] == domain])
+        print(f"  {domain}: {count} pairs")
+    print("-" * 50)
 
 
 def load_crows_pairs(domain, max_samples=80):
     """加载CrowS-Pairs数据集的指定领域"""
-    print(f"Loading pairs for domain: {domain}")
+    print(f"\nLoading pairs for domain: {domain}")
     
     # 下载数据
     df = download_crows_pairs()
     
+    # 先打印所有可用的领域
+    print_available_domains(df)
+    
+    # 检查领域是否存在（不区分大小写）
+    available_domains = df['bias_type'].unique()
+    if domain not in available_domains:
+        print(f"⚠️ Domain '{domain}' not found!")
+        print(f"Available domains: {available_domains}")
+        # 尝试模糊匹配
+        for avail in available_domains:
+            if domain.lower() in avail.lower() or avail.lower() in domain.lower():
+                print(f"  Did you mean: '{avail}'?")
+        return []  # 返回空列表
+    
     # 过滤指定领域
     domain_df = df[df["bias_type"] == domain]
     
-    print(f"Total pairs for '{domain}': {len(domain_df)}")
+    print(f"Pairs found for '{domain}': {len(domain_df)}")
     
     # 转换为列表
     pairs = []
@@ -92,6 +116,10 @@ def compute_pseudo_log_likelihood(model, tokenizer, sentence):
 
 def evaluate_bias(model_path, pairs, model_name):
     """评估模型的偏见"""
+    if len(pairs) == 0:
+        print(f"\n⚠️ No pairs to evaluate for {model_name}")
+        return 0, pd.DataFrame()
+    
     print(f"\n{'='*50}")
     print(f"Evaluating {model_name}")
     print(f"{'='*50}")
@@ -166,9 +194,12 @@ def print_results_table(all_scores, domain):
     print(f"{'Model':<25} {'Bias Score':<15} {'Judgment'}")
     print("-" * 60)
     
-    for model, score in all_scores.items():
-        if model == "domain":
-            continue
+    valid_scores = {k: v for k, v in all_scores.items() if k != "domain"}
+    if not valid_scores:
+        print("  No results to display!")
+        return
+    
+    for model, score in valid_scores.items():
         if score > 55:
             judgment = "⚠️ Biased"
         elif score < 45:
@@ -190,6 +221,11 @@ def main():
     # 步骤1: 加载数据
     print("\n[Step 1] Loading CrowS-Pairs dataset...")
     pairs = load_crows_pairs(SELECTED_DOMAIN, MAX_SAMPLES)
+    
+    if len(pairs) == 0:
+        print("\n⚠️ No data loaded. Please check the domain name and try again.")
+        print("Edit SELECTED_DOMAIN in the script with one of the available domains above.")
+        return
     
     print("\nSample pairs:")
     for i, pair in enumerate(pairs[:2]):
@@ -215,13 +251,13 @@ def main():
     summary_df.to_csv(f"bias_summary_{SELECTED_DOMAIN.replace('/', '_')}.csv", index=False)
     
     for i, (model_name, _) in enumerate(MODELS.items()):
-        all_dfs[i].to_csv(f"bias_details_{model_name}_{SELECTED_DOMAIN.replace('/', '_')}.csv", index=False)
+        if not all_dfs[i].empty:
+            all_dfs[i].to_csv(f"bias_details_{model_name}_{SELECTED_DOMAIN.replace('/', '_')}.csv", index=False)
     
     # 步骤4: 打印结果
     print_results_table(all_scores, SELECTED_DOMAIN)
     
     print("\nAll done!")
-    print(f"Results saved to CSV files.")
 
 
 if __name__ == "__main__":
