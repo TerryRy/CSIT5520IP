@@ -42,7 +42,7 @@ def sample_few_shot_examples(pool, shot, seed=None):
 
 
 def create_fewshot_prompt(premise, hypothesis, shot=0, seed=None):
-    f"Premise: {premise}\nHypothesis: {hypothesis}\nLabel:"
+    prompt = f"Premise: {premise}\nHypothesis: {hypothesis}\nLabel:"
     # 添加 few-shot 示例（使用随机抽样）
     if shot > 0:
         examples = sample_few_shot_examples(FEW_SHOT_EXAMPLE_POOL, shot, seed)
