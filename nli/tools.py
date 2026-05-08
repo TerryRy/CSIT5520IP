@@ -62,93 +62,155 @@
 # if __name__ == "__main__":
 #     create_few_shots_jsonl()
 
-# plot_results.py
+
+
+
+# # plot_results.py
+# import matplotlib.pyplot as plt
+# import numpy as np
+# import pandas as pd
+
+# # 设置中文字体（如果系统有的话）
+# plt.rcParams['font.sans-serif'] = ['Arial Unicode MS', 'SimHei', 'DejaVu Sans']
+# plt.rcParams['axes.unicode_minus'] = False
+
+# # 数据
+# models = ['GPT-2', 'Flan-T5', 'Qwen3']
+# matched_acc = [0.3092, 0.5784, 0.7188]
+# mismatched_acc = [0.3112, 0.5556, 0.7176]
+
+# # Baseline数据
+# baselines = {
+#     'Random (0.33)': 0.33,
+#     'BERT-1000 (0.38/0.40)': 0.38,  # 使用matched
+#     'BERT-5000 (0.63/0.67)': 0.63,
+#     'BERT-10000 (0.70/0.72)': 0.70,
+#     'BERT-50000 (0.78/0.78)': 0.78,
+# }
+
+# baselines_mismatched = {
+#     'Random (0.33)': 0.33,
+#     'BERT-1000 (0.38/0.40)': 0.40,  # 使用mismatched
+#     'BERT-5000 (0.63/0.67)': 0.67,
+#     'BERT-10000 (0.70/0.72)': 0.72,
+#     'BERT-50000 (0.78/0.78)': 0.78,
+# }
+
+# # 创建图形
+# fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+
+# # 颜色设置
+# colors = ['#FF6B6B', '#4ECDC4', '#45B7D1']
+
+# # ============ Matched 子图 ============
+# x = np.arange(len(models))
+# width = 0.5
+
+# bars1 = ax1.bar(x, matched_acc, width, color=colors, edgecolor='black', linewidth=1.2)
+
+# # 在柱状图顶部标出具体数值
+# for i, (bar, acc) in enumerate(zip(bars1, matched_acc)):
+#     ax1.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.01,
+#              f'{acc:.4f}', ha='center', va='bottom', fontsize=11, fontweight='bold')
+
+# # 添加baseline水平虚线
+# colors_baselines = ['#808080', '#FFA07A', '#98FB98', '#87CEEB', '#DDA0DD']
+# for (name, value), color in zip(baselines.items(), colors_baselines):
+#     ax1.axhline(y=value, color=color, linestyle='--', linewidth=1.5, alpha=0.7)
+#     ax1.text(2.3, value + 0.005, name, color=color, fontsize=9, fontweight='bold',
+#              bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8))
+
+# ax1.set_xticks(x)
+# ax1.set_xticklabels(models, fontsize=12)
+# ax1.set_ylabel('Accuracy', fontsize=12)
+# ax1.set_title('Matched Accuracy', fontsize=14, fontweight='bold')
+# ax1.set_ylim(0, 0.9)
+# ax1.grid(axis='y', alpha=0.3)
+
+# # ============ Mismatched 子图 ============
+# bars2 = ax2.bar(x, mismatched_acc, width, color=colors, edgecolor='black', linewidth=1.2)
+
+# for i, (bar, acc) in enumerate(zip(bars2, mismatched_acc)):
+#     ax2.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.01,
+#              f'{acc:.4f}', ha='center', va='bottom', fontsize=11, fontweight='bold')
+
+# for (name, value), color in zip(baselines_mismatched.items(), colors_baselines):
+#     ax2.axhline(y=value, color=color, linestyle='--', linewidth=1.5, alpha=0.7)
+#     ax2.text(2.3, value + 0.005, name, color=color, fontsize=9, fontweight='bold',
+#              bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8))
+
+# ax2.set_xticks(x)
+# ax2.set_xticklabels(models, fontsize=12)
+# ax2.set_ylabel('Accuracy', fontsize=12)
+# ax2.set_title('Mismatched Accuracy', fontsize=14, fontweight='bold')
+# ax2.set_ylim(0, 0.9)
+# ax2.grid(axis='y', alpha=0.3)
+
+# # 总标题
+# fig.suptitle('Task 2.1: Zero-shot NLI Performance Comparison\nwith Fine-tuned BERT Baselines', 
+#              fontsize=16, fontweight='bold', y=1.02)
+
+# plt.tight_layout()
+# plt.savefig('nli_results_comparison.png', dpi=300, bbox_inches='tight')
+# plt.show()
+
+# print("Figure saved to nli_results_comparison.png")
+
+
+# plot_hallucination_results.py
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-# 设置中文字体（如果系统有的话）
 plt.rcParams['font.sans-serif'] = ['Arial Unicode MS', 'SimHei', 'DejaVu Sans']
 plt.rcParams['axes.unicode_minus'] = False
 
 # 数据
-models = ['GPT-2', 'Flan-T5', 'Qwen3']
-matched_acc = [0.3092, 0.5784, 0.7188]
-mismatched_acc = [0.3112, 0.5556, 0.7176]
+models = ['Flan-T5', 'Qwen3', 'BERT-10000', 'BERT-50000']
+metrics = ['Accuracy', 'Precision', 'Recall', 'F1']
 
-# Baseline数据
-baselines = {
-    'Random (0.33)': 0.33,
-    'BERT-1000 (0.38/0.40)': 0.38,  # 使用matched
-    'BERT-5000 (0.63/0.67)': 0.63,
-    'BERT-10000 (0.70/0.72)': 0.70,
-    'BERT-50000 (0.78/0.78)': 0.78,
+# 你的结果
+data = {
+    'Flan-T5':       [0.802, 0.812, 0.948, 0.875],
+    'Qwen3':         [0.835, 0.832, 0.970, 0.896],
+    'BERT-10000':    [0.771, 0.776, 0.964, 0.860],
+    'BERT-50000':    [0.770, 0.803, 0.907, 0.852],
 }
 
-baselines_mismatched = {
-    'Random (0.33)': 0.33,
-    'BERT-1000 (0.38/0.40)': 0.40,  # 使用mismatched
-    'BERT-5000 (0.63/0.67)': 0.67,
-    'BERT-10000 (0.70/0.72)': 0.72,
-    'BERT-50000 (0.78/0.78)': 0.78,
-}
+# 颜色
+colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4']
 
 # 创建图形
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+fig, ax = plt.subplots(figsize=(12, 7))
 
-# 颜色设置
-colors = ['#FF6B6B', '#4ECDC4', '#45B7D1']
+# 设置柱状图位置
+x = np.arange(len(metrics))
+width = 0.18  # 四个模型并排
 
-# ============ Matched 子图 ============
-x = np.arange(len(models))
-width = 0.5
+# 绘制每个模型的柱状图
+for i, (model, values) in enumerate(data.items()):
+    bars = ax.bar(x + i * width, values, width, label=model, 
+                  color=colors[i], edgecolor='black', linewidth=1.2)
+    
+    # 在柱状图顶部标出数值
+    for bar, val in zip(bars, values):
+        ax.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.01,
+                f'{val:.3f}', ha='center', va='bottom', fontsize=8, fontweight='bold')
 
-bars1 = ax1.bar(x, matched_acc, width, color=colors, edgecolor='black', linewidth=1.2)
+# 设置坐标轴
+ax.set_xticks(x + width * 1.5)
+ax.set_xticklabels(metrics, fontsize=13, fontweight='bold')
+ax.set_ylabel('Score', fontsize=13, fontweight='bold')
+ax.set_ylim(0.6, 1.0)  # 从0.6开始放大差异
+ax.grid(axis='y', alpha=0.3, linestyle=':')
 
-# 在柱状图顶部标出具体数值
-for i, (bar, acc) in enumerate(zip(bars1, matched_acc)):
-    ax1.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.01,
-             f'{acc:.4f}', ha='center', va='bottom', fontsize=11, fontweight='bold')
+# 图例
+ax.legend(fontsize=11, loc='lower right')
 
-# 添加baseline水平虚线
-colors_baselines = ['#808080', '#FFA07A', '#98FB98', '#87CEEB', '#DDA0DD']
-for (name, value), color in zip(baselines.items(), colors_baselines):
-    ax1.axhline(y=value, color=color, linestyle='--', linewidth=1.5, alpha=0.7)
-    ax1.text(2.3, value + 0.005, name, color=color, fontsize=9, fontweight='bold',
-             bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8))
-
-ax1.set_xticks(x)
-ax1.set_xticklabels(models, fontsize=12)
-ax1.set_ylabel('Accuracy', fontsize=12)
-ax1.set_title('Matched Accuracy', fontsize=14, fontweight='bold')
-ax1.set_ylim(0, 0.9)
-ax1.grid(axis='y', alpha=0.3)
-
-# ============ Mismatched 子图 ============
-bars2 = ax2.bar(x, mismatched_acc, width, color=colors, edgecolor='black', linewidth=1.2)
-
-for i, (bar, acc) in enumerate(zip(bars2, mismatched_acc)):
-    ax2.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.01,
-             f'{acc:.4f}', ha='center', va='bottom', fontsize=11, fontweight='bold')
-
-for (name, value), color in zip(baselines_mismatched.items(), colors_baselines):
-    ax2.axhline(y=value, color=color, linestyle='--', linewidth=1.5, alpha=0.7)
-    ax2.text(2.3, value + 0.005, name, color=color, fontsize=9, fontweight='bold',
-             bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8))
-
-ax2.set_xticks(x)
-ax2.set_xticklabels(models, fontsize=12)
-ax2.set_ylabel('Accuracy', fontsize=12)
-ax2.set_title('Mismatched Accuracy', fontsize=14, fontweight='bold')
-ax2.set_ylim(0, 0.9)
-ax2.grid(axis='y', alpha=0.3)
-
-# 总标题
-fig.suptitle('Task 2.1: Zero-shot NLI Performance Comparison\nwith Fine-tuned BERT Baselines', 
-             fontsize=16, fontweight='bold', y=1.02)
+# 标题
+ax.set_title('Hallucination Detection Performance\n(NLI → Hallucination Mapping)', 
+             fontsize=15, fontweight='bold', pad=15)
 
 plt.tight_layout()
-plt.savefig('nli_results_comparison.png', dpi=300, bbox_inches='tight')
+plt.savefig('hallucination_results.png', dpi=300, bbox_inches='tight')
 plt.show()
-
-print("Figure saved to nli_results_comparison.png")
